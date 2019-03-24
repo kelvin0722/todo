@@ -7,6 +7,8 @@
 </template>
 
 <script>
+import axios from 'axios'
+
 import Todos from './components/Todos'
 import Header from './components/Layout/Header'
 import AddTodo from './components/AddTodo'
@@ -20,33 +22,39 @@ export default {
   },
   data() {
     return {
-      todos: [
-        {
-          id: 1,
-          title: "Todo One",
-          completed: false,
-        },
-         {
-          id: 2,
-          title: "Todo Two",
-          completed: true,
-        },
-         {
-          id: 3,
-          title: "Todo Three",
-          completed: false,
-        }
-      ]
+      todos: []
     }
   },
   methods: {
-    deleteTodo(id){
-      this.todos = this.todos.filter(todo => todo.id != id)
+    async deleteTodo(id){
+      try {
+        const response = await axios.delete('https://jsonplaceholder.typicode.com/', id)
+        this.todos = this.todos.filter(todo => todo.id !== response.data.id )
+      } catch (error) {
+        console.log(error)
+      }
     },
-    addTodo(newTodo){
-      this.todos = [...this.todos, newTodo]
+    async addTodo(newTodo){
+      try {
+        const { title , completed } = newTodo
+        const response = await axios.post('https://jsonplaceholder.typicode.com/', {
+          title,
+          completed
+        })
+      } catch (error) {
+        console.log(error)
+      }
+        this.todos = [...this.todos, response.data]
+    },
+  },
+  async created() {
+    try {
+      const response = await axios.get('https://jsonplaceholder.typicode.com/todos?_limit=5')
+      this.todos = response.data
+    } catch (error) {
+      console.log(error)
     }
-  }
+  },
 }
 </script>
 
